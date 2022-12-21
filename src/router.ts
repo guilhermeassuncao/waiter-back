@@ -1,46 +1,45 @@
+import path from 'node:path';
+
 import { Router } from 'express';
+import multer from 'multer';
+
 import { createCategory } from './app/useCases/categories/createCategory';
 import { listCategories } from './app/useCases/categories/listCategories';
+import { createProduct } from './app/useCases/products/createProduct';
+import { listProducts } from './app/useCases/products/listProducts';
+import { listProductsByCategory } from './app/useCases/categories/listProductsByCategory';
+import { listOrders } from './app/useCases/orders/listOrders';
+import { createOrder } from './app/useCases/orders/createOrder';
+import { changeOrderStatus } from './app/useCases/orders/changeOrderStatus';
+import { cancelOrder } from './app/useCases/orders/cancelOrder';
 
 export const router = Router();
 
-//Listar Categorias
+const upload = multer({
+    storage: multer.diskStorage({
+        destination(req, file, callback) {
+            callback(null, path.resolve(__dirname, '..', 'uploads'));
+        },
+        filename(req, file, callback) {
+            callback(null, `${Date.now()}-${file.originalname}`);
+        },
+    }),
+});
+
 router.get('/categories', listCategories);
 
-//Criar Categoria
 router.post('/categories', createCategory);
 
-//Listar Produtos
-router.get('/products', (req, res) => {
-    res.send('OK');
-});
+router.get('/products', listProducts);
 
-//Criar Produtos
-router.post('/products', (req, res) => {
-    res.send('OK');
-});
+router.post('/products', upload.single('image'), createProduct);
 
-//Buscar Produtos por Categoria
-router.get('/categories/:categoryId/products', (req, res) => {
-    res.send('OK');
-});
+router.get('/categories/:categoryId/products', listProductsByCategory);
 
-//Listar Ordens
-router.get('/orders', (req, res) => {
-    res.send('OK');
-});
+router.get('/orders', listOrders);
 
-//Criar Ordem
-router.post('/orders', (req, res) => {
-    res.send('OK');
-});
+router.post('/orders', createOrder);
 
-//Alterar Status Ordem
-router.patch('/orders/:orderId', (req, res) => {
-    res.send('OK');
-});
+router.patch('/orders/:orderId', changeOrderStatus);
 
-//Deletar Ordem
-router.delete('/orders/:orderId', (req, res) => {
-    res.send('OK');
-});
+router.delete('/orders/:orderId', cancelOrder);
